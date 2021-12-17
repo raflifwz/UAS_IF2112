@@ -25,7 +25,7 @@ df_joined = df1.merge(df2, how="left",
 if selected_menu == 'Home':
     st.title('UAS Pemrograman Komputer - Teknik Perminyakan 2020')
     st.subheader('Rafli Fawwaz - 12220024')
-    st.write('Alpikasi GUI berbasis Streamlit untuk menampilkan informasi produksi minyak mentah'\
+    st.write('Aplikasi GUI berbasis Streamlit untuk menampilkan informasi produksi minyak mentah'\
             ' pada negara-negara di seluruh dunia')
 
 # Pengerjaan untuk poin A
