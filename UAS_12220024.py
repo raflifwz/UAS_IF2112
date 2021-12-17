@@ -82,7 +82,7 @@ elif selected_menu == 'Negara dengan produksi tertinggi':
 
 
 # Pengerjaan untuk poin D
-elif selected_menu == 'Ringkasan produksi pada tahun tertentu':
+elif selected_menu == 'Ringkasan produksi pada tahun tertentu dan keseluruhan tahun':
     # Prosedur untuk menampilkan informasi suatu negara
     def show_info(country_name, year):
         df_country = df_joined[df_joined['name'] == country_name]
