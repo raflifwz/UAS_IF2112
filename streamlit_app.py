@@ -8,16 +8,28 @@ df2 = pd.read_json("kode_negara_lengkap.json")
 
 # sidebar
 st.sidebar.title("Menu")
-menu_select = ['Data produksi negara', 'Negara dengan produksi tertinggi pada tahun tertentu',
-               'Negara dengan produksi tertinggi', 'Ringkasan produksi pada tahun tertentu']
+menu_select = [
+    'Home',
+    'Data produksi negara',
+    'Negara dengan produksi tertinggi pada tahun tertentu',
+    'Negara dengan produksi tertinggi',
+    'Ringkasan produksi pada tahun tertentu'
+]
 selected_menu = st.sidebar.radio('', menu_select)
 
 df_joined = df1.merge(df2, how="left",
                       left_on="kode_negara", right_on="alpha-3")
 
 
+# Home
+if selected_menu == 'Home':
+    st.title('UAS Pemrograman Komputer - Teknik Perminyakan 2020')
+    st.subheader('Rafli Fawwaz - 12220024')
+    st.write('Alpikasi GUI berbasis Streamlit untuk menampilkan informasi produksi minyak mentah'\
+            ' pada negara-negara di seluruh dunia')
+
 # Pengerjaan untuk poin A
-if selected_menu == 'Data produksi negara':
+elif selected_menu == 'Data produksi negara':
     st.title(selected_menu.capitalize())
     countries_code = pd.Series(df1['kode_negara'].unique()).sort_values()
 
@@ -71,35 +83,55 @@ elif selected_menu == 'Negara dengan produksi tertinggi':
 
 # Pengerjaan untuk poin D
 elif selected_menu == 'Ringkasan produksi pada tahun tertentu':
-    st.title(selected_menu)
-
-    year_list = df1['tahun'].unique()
-    year_list.sort()
-    year_choice = st.selectbox("Pilih Tahun", year_list[::-1])
-
-    # Sort dataframe berdasarkan total produksi
-    sorted_df = df_joined[df_joined['tahun'] == year_choice].groupby(
-        'name').sum().sort_values('produksi', ascending=False)
-    country_max = sorted_df.index[0]
-    country_min = sorted_df[sorted_df['produksi'] > 0].index[-1]
-    country_zero = sorted_df[sorted_df['produksi'] == 0]
-
+    # Prosedur untuk menampilkan informasi suatu negara
     def show_info(country_name, year):
         df_country = df_joined[df_joined['name'] == country_name]
         alpha3_code = df_country["alpha-3"].iloc[0]
         alpha2_code = df_country["alpha-2"].iloc[0]
         region = df_country["region"].iloc[0]
         sub_region = df_country["sub-region"].iloc[0]
-        production_year = df_country[(df_country["name"] == country_name) & (df_country["tahun"] == year)]["produksi"].iloc[0]
-        total_prod = df_country[(df_country["name"] == country_name)]["produksi"].sum()
+        production_year = df_country[(df_country["name"] == country_name) & (
+            df_country["tahun"] == year)]["produksi"]
+        total_prod = df_country[(df_country["name"] ==
+                                 country_name)]["produksi"].sum()
 
         # Tampilkan hasilnya pada streamlit
         st.write(f'Nama Negara: {country_name}')
         st.write(f'Kode Negara: {alpha3_code}/{alpha2_code}')
         st.write(f'Region: {region}')
         st.write(f'Sub-Region: {sub_region}')
-        st.write(f'Produksi pada tahun {year}: {round(production_year, 2)}')
-        st.write(f'Total produksi: {round(total_prod, 2)}')
+        if year is None:
+            st.write(f'Total produksi: {round(total_prod, 2)}')
+        else:
+            st.write(
+                f'Produksi pada tahun {year}: {round(production_year.iloc[0], 2)}')
+            pass
+
+    st.title(selected_menu)
+
+    # Pilih untuk tampilkan tahun tertentu atau keseluruhan tahun
+    choice = st.radio(
+        "", ["Ringkasan untuk tahun tertentu", "Ringkasan keseluruhan tahun"])
+
+    if choice == "Ringkasan untuk tahun tertentu":
+        year_list = df1['tahun'].unique()
+        year_list.sort()
+        year_choice = st.selectbox("Pilih Tahun", year_list[::-1])
+
+        # Sort dataframe berdasarkan total produksi
+        sorted_df = df_joined[df_joined['tahun'] == year_choice].groupby(
+            'name').sum().sort_values('produksi', ascending=False)
+        country_max = sorted_df.index[0]
+        country_min = sorted_df[sorted_df['produksi'] > 0].index[-1]
+        country_zero = sorted_df[sorted_df['produksi'] == 0]
+    else:
+        # keseluruhan tahun
+        sorted_df = df_joined.groupby('name').sum(
+        ).sort_values('produksi', ascending=False)
+        country_max = sorted_df.index[0]
+        country_min = sorted_df[sorted_df['produksi'] > 0].index[-1]
+        country_zero = sorted_df[sorted_df['produksi'] == 0]
+        year_choice = None
 
     # Tampilkan data
     st.markdown('## Negara dengan Produksi Terbesar')
@@ -107,7 +139,6 @@ elif selected_menu == 'Ringkasan produksi pada tahun tertentu':
 
     st.markdown('## Negara dengan Produksi Terkecil')
     show_info(country_min, year_choice)
-
 
     st.markdown('## Negara dengan Produksi Nol')
     for country in country_zero.index.sort_values():
